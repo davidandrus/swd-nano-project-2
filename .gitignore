@@ -2,11 +2,9 @@ node_modules
 
 dist/*
 
-# maybe not needed, since we will probably compile index.html from ejs later
-!dist/index.html
-
-
 .DS_Store
 
 npm-debug.log*
 yarn-error.log*
+
+keys.json
