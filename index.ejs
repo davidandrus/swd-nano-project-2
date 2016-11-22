@@ -7,8 +7,14 @@
   <title>Document</title>
 </head>
 <body>
+  <div>
+    <label>Start Address<br /> <input style="width: 500px" type="text" id="start-address" /> </label>
+  </div>
+  <div>
+    <label>End Address<br/> <input style="width: 500px" type="text" id="end-address" /></label>
+  </div>
   <div id="map" style="height:500px; width: 500px;"></div>
   <script type="text/javascript" src="static/bundle.js"></script>
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%= google_maps %>&callback=initMap" async defer></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%= google_maps %>&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
