@@ -7,9 +7,28 @@
   <title>Document</title>
 </head>
 <body>
-  <select id="agencies-list">
-    <option value="">Select a Agency</option>
+  <select
+    id="agencies-list"
+    v-on:change="handleChange">
+    <option
+      v-for="option in options"
+      v-bind:value="option.value"
+    >
+      {{ option.label }}
+    </option>
   </select>
+  <select
+    id="routes-list"
+    v-if="options.length > 0"
+    >
+    <option
+      v-for="option in options"
+      v-bind:value="option.value"
+    >
+      {{ option.label }}
+    </option>
+  </select>
+
   <div>
     <label>Start Address<br /> <input style="width: 500px" type="text" id="start-address" /> </label>
   </div>

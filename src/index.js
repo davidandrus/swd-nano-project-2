@@ -1,39 +1,61 @@
 import getCurrentPosition from './geolocation';
 import getMap from './map';
+import Vue from 'vue';
+import API from './api';
 
 // @TOOD - add directions from searches https://maps.googleapis.com/maps/api/directions/json?origin=Lynnwood Transit Center&destination=2200 Western Ave. Seattle, WA&key=AIzaSyDNOfSkNVWM83D3UmZDQjqHQK7PpRG3G_k&mode=transit
 
 let GM;
-let directionsService
-
-const agenciesSelect = document.querySelector('#agencies-list');
+let directionsService;
 
 // @TOOD - show message if service worker is not supported
 // if ('serviceWorker' in navigator) {
 //   //@TODO - static/ is for dev only
 //   navigator.serviceWorker.register('/static/sw.bundle.js');
 // }
+//
+const applyOptions = instance => options => instance.options.push.apply(instance.options, options);
 
-
-fetch('http://localhost:3000/agencies')
-  .then(response => response.json())
-  .then(response => response.data.references.agencies.map(
-    ({ name, id }) => ({name, id})
-  ))
-  .then(items => {
-    items.forEach(item => {
-      const node = document.createElement('option');
-      node.innerHTML = item.name;
-      node.setAttribute('value', item.id);
-      agenciesSelect.appendChild(node);
-    });
-  });
-
-agenciesSelect.addEventListener('change', e => {
-  console.log(e.target.value);
-
-
+const agencies = new Vue({
+  el: '#agencies-list',
+  created() {
+    API.getAgencyOptions()
+      .then(applyOptions(this));
+    //this.$el.value = '1'; // default to KC Metro
+  },
+  data: {
+    options: [{
+      label: 'Select an Agency',
+      value: ''
+    }],
+  },
+  methods: {
+    handleChange(event) {
+      routes.loadRoutes(event.target.value);
+    }
+  }
 });
+
+const routeDefaultOptions = [{
+  name: 'Select a Route',
+  id: ''
+}];
+
+const routes = new Vue({
+  el: '#routes-list',
+  methods: {
+    loadRoutes(id) {
+      console.log('loading routes', id);
+      API
+        .getRoutesOptions(id)
+        .then(applyOptions(this))
+    }
+  },
+  data: {
+    options: []
+  }
+});
+
 
 Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
 

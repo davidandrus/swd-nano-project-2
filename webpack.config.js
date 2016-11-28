@@ -22,4 +22,9 @@ module.exports = {
       include: path.join(__dirname, 'src'),
     }],
   },
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.common.js',
+    }
+  }
 };
