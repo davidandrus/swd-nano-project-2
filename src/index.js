@@ -6,6 +6,15 @@ import getMap from './map';
 let GM;
 let directionsService
 
+const agenciesSelect = document.querySelector('agencies-list');
+
+fetch('http://localhost:3000/agencies')
+  .then(response => response.json())
+  .then(response => response.data.references.agencies.map(
+    ({ name, id }) => ({name, id})
+  ))
+  .then(console.log);
+
 Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
 
   GM = google.maps;

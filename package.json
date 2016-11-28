@@ -23,8 +23,12 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^3.0.1",
     "eslint-plugin-react": "^6.6.0",
+    "isomorphic-fetch": "^2.2.1",
+    "kcors": "next",
     "koa": "2",
+    "koa-router": "7",
     "nodemon": "^1.11.0",
+    "query-string": "^4.2.3",
     "webpack": "^1.13.3",
     "webpack-dashboard": "^0.2.0",
     "webpack-dev-server": "^1.16.2"
