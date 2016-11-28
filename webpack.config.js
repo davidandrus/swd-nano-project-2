@@ -3,13 +3,16 @@ var DashboardPlugin = require('webpack-dashboard/plugin');
 
 module.exports = {
   devtool: '#source-map',
-  entry: ['./src/'],
+  entry: {
+    main: './src/index.js',
+    sw: './src/sw.js',
+  },
   plugins: [
     new DashboardPlugin()
   ],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     publicPath: '/static/',
   },
   module: {

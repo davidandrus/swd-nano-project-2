@@ -6,14 +6,34 @@ import getMap from './map';
 let GM;
 let directionsService
 
-const agenciesSelect = document.querySelector('agencies-list');
+const agenciesSelect = document.querySelector('#agencies-list');
+
+// @TOOD - show message if service worker is not supported
+// if ('serviceWorker' in navigator) {
+//   //@TODO - static/ is for dev only
+//   navigator.serviceWorker.register('/static/sw.bundle.js');
+// }
+
 
 fetch('http://localhost:3000/agencies')
   .then(response => response.json())
   .then(response => response.data.references.agencies.map(
     ({ name, id }) => ({name, id})
   ))
-  .then(console.log);
+  .then(items => {
+    items.forEach(item => {
+      const node = document.createElement('option');
+      node.innerHTML = item.name;
+      node.setAttribute('value', item.id);
+      agenciesSelect.appendChild(node);
+    });
+  });
+
+agenciesSelect.addEventListener('change', e => {
+  console.log(e.target.value);
+
+
+});
 
 Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
 

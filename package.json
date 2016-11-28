@@ -7,8 +7,9 @@
   "license": "CC0-1.0",
   "scripts": {
     "build-index": "babel-node ./scripts/build-index",
-    "build": "npm run build-index && webpack",
-    "start": "npm run build-index && webpack-dashboard -- webpack-dev-server --content-base dist/ --inline",
+    "setup": "npm run build-index",
+    "build": "npm run setup && webpack",
+    "start": "npm run setup && webpack-dashboard -- webpack-dev-server --content-base dist/ --inline",
     "start:server": "nodemon --exec babel-node -- ./src/server.js"
   },
   "dependencies": {
