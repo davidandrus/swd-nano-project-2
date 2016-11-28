@@ -4,10 +4,12 @@ import getMap from './map';
 // @TOOD - add directions from searches https://maps.googleapis.com/maps/api/directions/json?origin=Lynnwood Transit Center&destination=2200 Western Ave. Seattle, WA&key=AIzaSyDNOfSkNVWM83D3UmZDQjqHQK7PpRG3G_k&mode=transit
 
 let GM;
+let directionsService
 
 Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
 
-  const GM = google.maps;
+  GM = google.maps;
+  directionsService = new google.maps.DirectionsService;
 
   /**
    *  @TODO - this should be generated from one bus away
@@ -50,9 +52,10 @@ Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
     const label = end === 'start' ? 'S' : 'E';
 
     return function setMarker() {
-      if (!this.getPlace() || !this.getPlace().geometry) return;
+      const place = this.getPlace();
+      if (!place || !place.geometry) return;
 
-      const location = this.getPlace().geometry.location;
+      const location = place.geometry.location;
       const lat = location.lat();
       const lng = location.lng();
       const newCoords = { lat, lng };
@@ -71,6 +74,24 @@ Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
         var bounds = new google.maps.LatLngBounds();
         Object.keys(markers).forEach(key => bounds.extend(markers[key].getPosition()))
         map.fitBounds(bounds);
+
+        console.log(markers);
+
+        // @TODO - make this into a promise
+        directionsService.route({
+          origin: markers.start.getPosition(),
+          destination: markers.end.getPosition(),
+          travelMode: 'TRANSIT',
+        }, function(response, status) {
+          if (status === 'OK') {
+            console.log(response.routes[0].legs[0].steps)
+          }
+
+        }, function() {
+          console.log('it did not work yo');
+        });
+        //
+
       }
     }
   }
