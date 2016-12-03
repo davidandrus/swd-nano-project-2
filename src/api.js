@@ -1,11 +1,17 @@
 // @TODO - should be different depending on environment
 const baseURL = 'http://localhost:3000';
 
-function mapOptions(labelProp = 'name', valueProp = 'id') {
+function mapOptionsFactory(labelProp = 'name', valueProp = 'id') {
   return item => ({
-    label: item[labelProp],
+    label: typeof labelProp === 'function' ? labelProp(item): item[labelProp],
     value: item[valueProp],
   });
+}
+
+function routeLabelGetter({ shortName, longName }) {
+  return shortName && longName
+    ? `${shortName} - ${longName}`
+    : shortName || longName;
 }
 
 export default {
@@ -15,11 +21,15 @@ export default {
 
   getRoutesOptions(id) {
     return this._fetch(`routes_for_agency/${id}`)
-      .then(response =>  response.data.list.map(mapOptions('shortName', 'id')));
+      .then(response =>  response.data.list.map(mapOptionsFactory(routeLabelGetter, 'id')));
   },
 
   getAgencyOptions() {
     return this._fetch('agencies')
-      .then(response => response.data.references.agencies.map(mapOptions()))
+      .then(response => response.data.references.agencies.map(mapOptionsFactory()))
+  },
+
+  getStopsforRoute() {
+    //return this._fetch('')
   }
 }

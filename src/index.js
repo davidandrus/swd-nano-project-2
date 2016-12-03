@@ -45,10 +45,11 @@ const routes = new Vue({
   el: '#routes-list',
   methods: {
     loadRoutes(id) {
-      console.log('loading routes', id);
       API
         .getRoutesOptions(id)
-        .then(applyOptions(this))
+        .then(items => {
+          this.options = items
+        })
     }
   },
   data: {
