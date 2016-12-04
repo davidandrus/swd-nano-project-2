@@ -8,17 +8,45 @@ const mapReady = new Promise((resolve, reject) => {
 
 window.initMap = function() {
   GM = google.maps;
+
   map = new GM.Map(document.getElementById('map'), {
-    // should be center of seattle here,
-     center: {lat: -34.397, lng: 150.644},
-     zoom: 14
-   });
+    // should be center of coverage area here,
+   center: { lat: -34.397, lng: 150.644 },
+   zoom: 16,
+   styles: [{
+     featureType: "transit",
+     stylers: [{
+       visibility: "off"
+     }],
+   }],
+  });
   resolveFn(map);
 }
 
 class Map {
-  setBusStops() {
-    
+  setBusStops(stops, clickListener) {
+    mapReady.then(map => {
+      stops.forEach(({ lat, lon, name, id }) => {
+        const position = {
+          lat,
+          lng: lon
+        };
+        const marker = new GM.Marker({
+          map,
+          position,
+          animation: GM.Animation.DROP,
+          //label: name,
+          title: name,
+        });
+
+        marker.addListener('click', () => {
+          map.setCenter(marker.getPosition());
+          // set active stop icon
+
+          clickListener(id);
+        });
+      });
+    });
   }
 
   setMyPosition(loc) {
@@ -27,7 +55,7 @@ class Map {
         map,
         position: loc,
         title: 'Me'
-      }).setMap(map);
+      });
 
       map.setCenter(loc);
     });
@@ -35,8 +63,3 @@ class Map {
 }
 
 export default new Map();
-
-//
-// export default function getMap() {
-//   return mapReady;
-// };

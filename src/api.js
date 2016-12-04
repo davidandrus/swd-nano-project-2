@@ -1,3 +1,5 @@
+import qs from 'query-string';
+
 // @TODO - should be different depending on environment
 const baseURL = 'http://localhost:3000';
 
@@ -14,22 +16,37 @@ function routeLabelGetter({ shortName, longName }) {
     : shortName || longName;
 }
 
-export default {
-  _fetch(endpoint) {
-    return fetch(`${baseURL}/${endpoint}`).then(response => response.json());
-  },
-
-  getRoutesOptions(id) {
-    return this._fetch(`routes_for_agency/${id}`)
-      .then(response =>  response.data.list.map(mapOptionsFactory(routeLabelGetter, 'id')));
-  },
-
-  getAgencyOptions() {
-    return this._fetch('agencies')
-      .then(response => response.data.references.agencies.map(mapOptionsFactory()))
-  },
-
-  getStopsforRoute() {
-    //return this._fetch('')
+class API {
+  _fetch(endpoint, params = {}) {
+    const queryString = Object.keys(params).length ? `?${qs.stringify(params)}` : '';
+    return fetch(`${baseURL}/${endpoint}${queryString}`).then(response => response.json());
   }
+
+  getStopsForLocation(pos) {
+    return this._fetch('stops_for_location', pos);
+  }
+
+  getStopDetails(id) {
+    return this._fetch('stop_details', { id });
+  }
+
+  getAgencies() {
+    return this._fetch('agencies');
+  }
+
+  // getRoutesOptions(id) {
+  //   return this._fetch(`routes_for_agency/${id}`)
+  //     .then(response =>  response.data.list.map(mapOptionsFactory(routeLabelGetter, 'id')));
+  // },
+  //
+  // getAgencyOptions() {
+  //   return this._fetch('agencies')
+  //     .then(response => response.data.references.agencies.map(mapOptionsFactory()))
+  // },
+  //
+  // getStopsforRoute() {
+  //   //return this._fetch('')
+  // }
 }
+
+export default new API();

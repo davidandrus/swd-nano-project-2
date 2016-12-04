@@ -59,7 +59,17 @@ let directionsService;
 //   }
 // });
 
-getCurrentPosition().then(Map.setMyPosition);
+const onStopClick = id => {
+  API.getStopDetails(id).then(console.log);
+};
+
+const agenciesPromise = API.getAgencies();
+const posPromise = getCurrentPosition();
+posPromise.then(Map.setMyPosition);
+posPromise
+  .then(loc => API.getStopsForLocation(loc))
+  .then(stops => Map.setBusStops(stops, onStopClick));
+
 
 
 // Promise.all([getCurrentPosition(), getMap()]).then(([geo, map]) => {
