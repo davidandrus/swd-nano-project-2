@@ -6,12 +6,15 @@ import qs from 'query-string';
 import { one_bus_away as OBA_KEY } from '../keys.json';
 import gtfs from 'gtfs';
 
-import mongoose from 'mongoose';
+/**
+ *  @TODO possibly we could acheive this with a babel-module-resolver
+ *  this is kind of gross but we need to insure that one instance is used of mongo,
+ */
+import mongoose from './node_modules/gtfs/node_modules/mongoose';
 mongoose.Promise = global.Promise;
 
 // should get mongo route from config or something
 mongoose.connect('mongodb://localhost:27017/GTFS');
-
 
 const OBA_BASE_PATH = 'http://api.pugetsound.onebusaway.org/api';
 const getRequestUrl = path => {
