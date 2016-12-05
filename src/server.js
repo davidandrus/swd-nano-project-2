@@ -105,7 +105,9 @@ router
   // @TODO - possibly can combine some calls as much of the data comes back as references
   .get('/stop_schedule', async (ctx, next) => {
     const { id, date: requestDate } = ctx.request.query;
+    const response = await makeRequest(`where/schedule-for-stop/${id}`, { date });
     const {
+      currentTime,
       data: {
         entry: {
           date,
@@ -116,16 +118,17 @@ router
           routes,
         },
       },
-    } = await makeRequest(`where/schedule-for-stop/${id}`, { date });
+    } = response;
 
     ctx.body = stopRouteSchedules.map(details => ({
+      currentTime,
       route: routes.filter(route => details.routeId === route.id).map(({ shortName, longName, agencyId }) => ({
         shortName,
         longName,
         agencyName: agencies.filter(agency => agency.id === agencyId)[0].name,
       }))[0],
       schedule: details.stopRouteDirectionSchedules.map(item => ({
-        headsign: item.tripHeadsign,
+        headSign: item.tripHeadsign,
         times: item.scheduleStopTimes.map(({ departureTime, tripId, serviceId }) => ({
           departureTime,
           serviceId,

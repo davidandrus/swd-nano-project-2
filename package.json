@@ -29,6 +29,7 @@
     "kcors": "next",
     "koa": "2",
     "koa-router": "7",
+    "moment": "^2.17.1",
     "mongoose": "^4.7.0",
     "nodemon": "^1.11.0",
     "query-string": "^4.2.3",
