@@ -29,6 +29,7 @@ const getRequestUrl = (path, params) => {
 
 const makeRequest = (endpoint, params) => {
   const url = getRequestUrl(endpoint, params);
+  console.log('making', url);
   return fetch(url)
     .then(response => response.json());
 };
@@ -99,11 +100,41 @@ router
       })),
     }
   })
-  // .get('/agencies', async (ctx, next) => {
-  //
-  //   ctx.body = await makeRequest('where/agencies-with-coverage');
-  //   next();
-  // })
+
+  // @TODO - use time coming back from OBA API since it can be used as canonical
+  // @TODO - possibly can combine some calls as much of the data comes back as references
+  .get('/stop_schedule', async (ctx, next) => {
+    const { id, date: requestDate } = ctx.request.query;
+    const {
+      data: {
+        entry: {
+          date,
+          stopRouteSchedules,
+        },
+        references: {
+          agencies,
+          routes,
+        },
+      },
+    } = await makeRequest(`where/schedule-for-stop/${id}`, { date });
+
+    ctx.body = stopRouteSchedules.map(details => ({
+      route: routes.filter(route => details.routeId === route.id).map(({ shortName, longName, agencyId }) => ({
+        shortName,
+        longName,
+        agencyName: agencies.filter(agency => agency.id === agencyId)[0].name,
+      }))[0],
+      schedule: details.stopRouteDirectionSchedules.map(item => ({
+        headsign: item.tripHeadsign,
+        times: item.scheduleStopTimes.map(({ departureTime, tripId, serviceId }) => ({
+          departureTime,
+          serviceId,
+          tripId,
+        }))
+      }))
+    }));
+  })
+
   // .get('/routes_for_agency/:id', async (ctx, next) => {
   //   const { id } = ctx.params;
   //   ctx.body = await makeRequest(`where/routes-for-agency/${id}`);

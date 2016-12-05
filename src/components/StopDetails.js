@@ -35,17 +35,24 @@ const component = Vue.component('stopDetails', {
     return {
       loading: true,
       stop: {},
+      schedule: {},
     }
   },
   created() {
     /// console.log('get details', console.log);
     const id = this.$route.params.id;
-    API.getStopDetails(id)
-      .then(result => {
-        this.stop = result;
-        this.loading = false;
-        console.log(result);
-      });
+    const detailsPromise = API.getStopDetails(id);
+    detailsPromise.then(result => {
+      this.stop = result;
+    });
+
+    const schedulePromise = API.getScheduleForStop(id).then(console.log);
+
+    Promise.all([ detailsPromise ], () => {
+      this.loading = false;
+    });
+
+
   }
 })
 

@@ -30,6 +30,10 @@ class API {
     return this._fetch('stop_details', { id });
   }
 
+  getScheduleForStop(id) {
+    return this._fetch('stop_schedule', { id });
+  }
+
   getAgencies() {
     return this._fetch('agencies');
   }
