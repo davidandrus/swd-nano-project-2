@@ -2,6 +2,9 @@ import Vue from 'vue';
 import API from '../Api';
 import moment from 'moment';
 
+let pollTimeout;
+const msAsMinutes = time => Math.round(moment.duration(time, 'milliseconds').asMinutes());
+
 const component = Vue.component('stopDetails', {
   template: `
     <div>
@@ -16,7 +19,30 @@ const component = Vue.component('stopDetails', {
             >
           </li>
         </ul>
-        <h1>Schedule for {{ schedules.currentTime | formatDate }}</h1>
+        <div v-if="departures.list.length > 0">
+          <h1>Expected / Recent Departures</h1>
+          <table >
+            <tr>
+              <th>Route</th>
+              <th>Expected</th>
+              <th>Deviation</th>
+            </tr>
+            <tr v-for="departure in departures.list">
+              <td>
+                {{ departure.route.agencyName }} {{ departure.route.shortName }}<br />
+                <small>{{ departure.route.longName }}</small><br />
+                to {{ departure.headSign }}
+              </td>
+              <td>
+                {{ departure.departureTime - departures.currentTime + departure.deviation | formatExpectedTime }}<br />
+              </td>
+              <td>
+                {{ departure.deviation | formatDeviation }}
+              </td>
+            </tr>
+          </table>
+        </div>
+        <h1>Departure Schedule for {{ schedules.currentTime | formatDate }}</h1>
         <div v-for="routeSchedule in schedules">
           <table v-for="schedule in routeSchedule.schedule">
             <tr>
@@ -36,10 +62,25 @@ const component = Vue.component('stopDetails', {
   `,
   filters: {
     formatTime(value) {
-      return moment(value).format('HH:MMa');
+      return moment(value).format('h:MM a');
     },
     formatDate(value) {
       return moment(value).format('MM/DD/YYYY');
+    },
+    formatExpectedTime(value) {
+      const time = msAsMinutes(value);
+      return time > 0 ? `expected in ${time} minutes` : `left ${Math.abs(time)} minutes ago`
+    },
+    formatDeviation(value) {
+      if (value === 0) {
+        return 'on time';
+      }
+      if (value > 0) {
+        return `${msAsMinutes(value)} ahead of schedule`;
+      }
+      if (value < 0) {
+        return `${msAsMinutes(value)} behind of schedule`;
+      }
     },
     formatDirection(value) {
       switch(value) {
@@ -61,6 +102,9 @@ const component = Vue.component('stopDetails', {
       loading: true,
       stop: {},
       schedules: {},
+      departures: {
+        list: [],
+      },
     }
   },
   created() {
@@ -68,6 +112,7 @@ const component = Vue.component('stopDetails', {
     const id = this.$route.params.id;
     const detailsPromise = API.getStopDetails(id);
     const schedulePromise = API.getScheduleForStop(id);
+    const departuresPromise = API.getExpectedDeparturesForStop(id);
 
     detailsPromise.then(result => {
       this.stop = result;
@@ -75,6 +120,10 @@ const component = Vue.component('stopDetails', {
 
     schedulePromise.then(result => {
       this.schedules = result;
+    });
+
+    departuresPromise.then(result => {
+      this.departures = result;
       console.log(result);
     });
 

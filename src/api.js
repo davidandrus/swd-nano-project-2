@@ -15,11 +15,13 @@ function routeLabelGetter({ shortName, longName }) {
     ? `${shortName} - ${longName}`
     : shortName || longName;
 }
+// @TODO - build in retries on failure
 
 class API {
   _fetch(endpoint, params = {}) {
     const queryString = Object.keys(params).length ? `?${qs.stringify(params)}` : '';
-    return fetch(`${baseURL}/${endpoint}${queryString}`).then(response => response.json());
+    return fetch(`${baseURL}/${endpoint}${queryString}`)
+      .then(response => response.json());
   }
 
   getStopsForLocation(pos) {
@@ -34,23 +36,13 @@ class API {
     return this._fetch('stop_schedule', { id });
   }
 
+  getExpectedDeparturesForStop(id) {
+    return this._fetch('departures_for_stop', { id });
+  }
+
   getAgencies() {
     return this._fetch('agencies');
   }
-
-  // getRoutesOptions(id) {
-  //   return this._fetch(`routes_for_agency/${id}`)
-  //     .then(response =>  response.data.list.map(mapOptionsFactory(routeLabelGetter, 'id')));
-  // },
-  //
-  // getAgencyOptions() {
-  //   return this._fetch('agencies')
-  //     .then(response => response.data.references.agencies.map(mapOptionsFactory()))
-  // },
-  //
-  // getStopsforRoute() {
-  //   //return this._fetch('')
-  // }
 }
 
 export default new API();

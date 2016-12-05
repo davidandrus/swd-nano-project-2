@@ -34,11 +34,21 @@ const makeRequest = (endpoint, params) => {
     .then(response => response.json());
 };
 
+const getRouteDetails = (routes, agencies, routeIdToMatch) => {
+  return routes
+    .filter(route => routeIdToMatch === route.id)
+    .map(({ shortName, longName, agencyId }) => ({
+      shortName,
+      longName,
+      agencyName: agencies.filter(agency => agency.id === agencyId)[0].name,
+    }))[0]
+}
+
 const router = KoaRouter();
 
 var app = new Koa();
 
-// @TODO - make endpoints return minimum amout of data neccessary
+// @NOTE - this endpoints currently only return the most limited data the front end needs
 router
   .get('/agencies', async (ctx, next) => {
 
@@ -51,7 +61,7 @@ router
       },
     } = await makeRequest('where/agencies-with-coverage');
 
-    ctx.body = agencies.map(({ id, name, url}) => ({
+    ctx.body = agencies.map(({ id, name, url }) => ({
       id,
       name,
       url,
@@ -72,7 +82,9 @@ router
 
     const response =  await makeRequest('where/stops-for-location', params);
 
-    ctx.body = response.data.list;
+    ctx.body = response.data.list.map(({code, locationType, wheelchairBoarding, ...rest}) => ({
+      ...rest,
+    }));
   })
 
   .get('/stop_details', async (ctx, next) => {
@@ -101,11 +113,8 @@ router
     }
   })
 
-  // @TODO - use time coming back from OBA API since it can be used as canonical
-  // @TODO - possibly can combine some calls as much of the data comes back as references
   .get('/stop_schedule', async (ctx, next) => {
     const { id, date: requestDate } = ctx.request.query;
-    const response = await makeRequest(`where/schedule-for-stop/${id}`, { date });
     const {
       currentTime,
       data: {
@@ -118,51 +127,64 @@ router
           routes,
         },
       },
-    } = response;
+    } = await makeRequest(`where/schedule-for-stop/${id}`, { date });
 
-    ctx.body = stopRouteSchedules.map(details => ({
+    ctx.body = stopRouteSchedules.map(({ routeId, stopRouteDirectionSchedules }) => ({
       currentTime,
-      route: routes.filter(route => details.routeId === route.id).map(({ shortName, longName, agencyId }) => ({
-        shortName,
-        longName,
-        agencyName: agencies.filter(agency => agency.id === agencyId)[0].name,
-      }))[0],
-      schedule: details.stopRouteDirectionSchedules.map(item => ({
-        headSign: item.tripHeadsign,
-        times: item.scheduleStopTimes.map(({ departureTime, tripId, serviceId }) => ({
-          departureTime,
-          serviceId,
-          tripId,
-        }))
+      route: getRouteDetails(routes, agencies, routeId),
+      schedule: stopRouteDirectionSchedules
+        .map(({ tripHeadsign, scheduleStopTimes }) => ({
+          headSign: tripHeadsign,
+          times: scheduleStopTimes
+            .map(({ departureTime, tripId, serviceId }) => ({
+              departureTime,
+              serviceId,
+              tripId,
+            }))
       }))
     }));
   })
 
-  // .get('/routes_for_agency/:id', async (ctx, next) => {
-  //   const { id } = ctx.params;
-  //   ctx.body = await makeRequest(`where/routes-for-agency/${id}`);
-  //   // console.log(ctx.body);
-  //   next();
-  // })
-  // .get('/stops_for_route/:id', async (ctx, next) => {
-  //
-  //   gtfs.agencies((err, agencies) => {
-  //     ctx.body = 'agencies got yo';
-  //     next();
-  //   }).then(response => {
-  //     ctx.body = response;
-  //     next();
-  //   });
-  //
-  //   const { id } = ctx.params;
-  //   //ctx.body = 'sucka';
-  //   //next();
-  // });
+  .get('/departures_for_stop', async (ctx, next) => {
+    const { id } = ctx.request.query;
+    const response = await makeRequest(`where/arrivals-and-departures-for-stop/${id}`);
+    const {
+      currentTime,
+      data: {
+        entry: {
+          arrivalsAndDepartures,
+        },
+        references: {
+          routes,
+          agencies,
+          trips,
+        },
+      },
+    } = response;
 
-// app.use(async (ctx, next) => {
-//   ctx.body = "Hello World";
-// });
+    console.log(response);
+
+    ctx.body = {
+      currentTime,
+      list: arrivalsAndDepartures
+        .map(({
+          scheduledDepartureTime,
+          tripStatus: {
+            scheduleDeviation,
+          },
+          routeId,
+          tripId,
+        }) => ({
+          deviation: scheduleDeviation,
+          departureTime:  scheduledDepartureTime,
+          route: getRouteDetails(routes, agencies, routeId),
+          headSign: trips.filter(trip => trip.id === tripId)[0].tripHeadsign
+        })),
+    };
+  })
+
 app
+  //@TODO - setup cors whitelist
   .use(cors())
   .use(router.routes());
 
