@@ -1,0 +1,62 @@
+<div>
+  <div v-if="loading">Loading</div>
+  <div v-if="!loading">
+    <h1>Stop Details</h1>
+    <h2>{{ stop.name }} - {{ stop.direction | formatDirection }}</h2>
+    <ul>
+      <li v-for="route in stop.routes">
+        {{ route.id }} {{ route.shortName }}
+        <small v-if="route.longName">{{ route.longName }}</small>
+        >
+      </li>
+    </ul>
+    <section v-if="departures.list.length > 0">
+      <h1>Expected / Recent Departures</h1>
+      <table class='pure-table pure-table-horizontal'>
+        <thead>
+          <tr>
+            <th>Route</th>
+            <th>Expected</th>
+            <th>Deviation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="departure in departures.list">
+            <td>
+              {{ departure.route.agencyName }} {{ departure.route.shortName }}<br />
+              <small>{{ departure.route.longName }}</small><br />
+              to {{ departure.headSign }}
+            </td>
+            <td>
+              {{ departure.departureTime - departures.currentTime + departure.deviation | formatExpectedTime }}<br />
+            </td>
+            <td>
+              {{ departure.deviation | formatDeviation }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <h1>Departure Schedule for {{ schedules.currentTime | formatDate }}</h1>
+    <section v-for="routeSchedule in schedules">
+      <table
+        class="pure-table pure-table-horizontal"
+        v-for="schedule in routeSchedule.schedule">
+        <thead>
+          <tr>
+            <th>
+              {{ routeSchedule.route.agencyName }} {{ routeSchedule.route.shortName }}<br />
+              <small>{{ routeSchedule.route.longName }}</small><br />
+              to {{ schedule.headSign }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="time in schedule.times">
+            <td>{{ time.departureTime | formatTime }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>

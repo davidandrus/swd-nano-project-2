@@ -3,17 +3,10 @@ import getCurrentPosition from '../geolocation';
 import Map, { mapsReady } from '../map';
 import API from '../Api';
 import router from '../router';
+import template from './Nearby.template.html';
 
 const component = Vue.component('nearby', {
-  template: `
-    <div>
-      <div
-        id="nearby-map"
-        style="height: 500px; width: 500px"
-      >
-      </div>
-    </div>
-  `,
+  template,
   mounted() {
     const onStopClick = id => router.push(`stop/${id}`)
     const mapElem = this.$el.querySelector('#nearby-map');

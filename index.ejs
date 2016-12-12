@@ -5,14 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
+  <link type="text/css" rel="stylesheet" href="static/main.css" />
 </head>
 <body>
   <div id="app">
-    <h1>Transit App!</h1>
-    <p>
-      <router-link to="/nearby">Near Me</router-link>
-    </p>
-    <router-view></router-view>
+    <div class="pure-menu pure-menu-horizontal">
+      <a href="#" class="pure-menu-heading pure-menu-link">Ride Transit - Puget Sound</a>
+      <!-- <ul class="pure-menu-list">
+        <li class="pure-menu-item">
+            <router-link
+              class="pure-menu-link"
+              to="/nearby"
+            >
+              Near Me
+            </router-link>
+        </li>
+      </ul> -->
+    </div>
+    <main role="main">
+      <router-view></router-view>
+    </main>
   </div>
   <script type="text/javascript" src="static/main.bundle.js"></script>
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%= google_maps %>&libraries=places&callback=initMap" async defer></script>

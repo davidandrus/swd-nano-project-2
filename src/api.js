@@ -15,8 +15,7 @@ function routeLabelGetter({ shortName, longName }) {
     ? `${shortName} - ${longName}`
     : shortName || longName;
 }
-// @TODO - build in retries on failure
-
+// @TODO - build in retries on failure possibly on server side?
 class API {
   _fetch(endpoint, params = {}) {
     const queryString = Object.keys(params).length ? `?${qs.stringify(params)}` : '';

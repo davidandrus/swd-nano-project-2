@@ -1,5 +1,6 @@
 var path = require('path');
 var DashboardPlugin = require('webpack-dashboard/plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   devtool: '#source-map',
@@ -8,7 +9,8 @@ module.exports = {
     sw: './src/sw.js',
   },
   plugins: [
-    new DashboardPlugin()
+    new ExtractTextPlugin("[name].css"),
+    new DashboardPlugin(),
   ],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -20,6 +22,12 @@ module.exports = {
       test: /\.(js)?/,
       loaders: ['babel'],
       include: path.join(__dirname, 'src'),
+    }, {
+      test: /\.css$/,
+      loader: ExtractTextPlugin.extract("style-loader", "css-loader")
+    }, {
+      test: /\.html$/,
+      loaders: ['html'],
     }],
   },
   resolve: {
